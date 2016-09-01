@@ -9,7 +9,7 @@ $client = new DefaultAcsClient($iClientProfile);
 
 */
 //getting an instanceID
-$getInstanceId = "i-62hmzs99q";
+$getInstanceId = "i-62enfp8sb";
 
 // Showing the information of the instance
 
@@ -44,21 +44,17 @@ $request->setMethod("GET");
 //instance ID
 $instanceId = $getInstanceId; 
 $request->setInstanceId($instanceId); 
-$response_start = $client->getAcsResponse($request); 
-//print_r($response);
-
+$response = $client->getAcsResponse($request); 
+// Starting the instance
 
 $start = microtime(true);
 
-//echo "\n".$level_3->Status." dubug\n";
-//exit();
 // monitoring the state
 while(true){
 	$request = new Ecs\DescribeInstancesRequest();
 	$request->setMethod("GET");
 	$response = $client->getAcsResponse($request);
                                                                                                                  
-	$total = $response->TotalCount;
 	$level_1 = $response->Instances;
 	$level_2 = $level_1->Instance;
 	$level_3 = $level_2[$count];
@@ -69,63 +65,70 @@ while(true){
 }
 
 $end = microtime(true);
+
+//Showing the time of starting
 echo "\nstarting time: ".($end - $start)."sec\n"; 
 
 //Showing the status of the instance (wanna show only one instance)
-//$request = new Ecs\DescribeInstanceStatusRequest(); 
-//$request->setMethod("GET"); 
-//$zoneId = "cn-hongkong-b"; 
-//$request->setZoneId($zoneId); 
-//$response = $client->getAcsResponse($request);
-//exit();
-//$parameter = $request->getQueryParameters();
-//var_dump($parameter["Status"]);
-//print_r($response);
-//$level_1 = $response->InstanceStatuses; //level_1 = stdClass
-//$level_2 = $level_1->InstanceStatus; //level_2 = array
-//$level_3 = $level_2[0];//level_3 = stdClass
-$level_4 = $level_3->Status;
 echo "\nInstace status: ";
-print_r($level_4);
+print_r($level_3->Status);
 echo "\n";
 
-/*
+
 // Stoping the instance  
 $request = new Ecs\StopInstanceRequest(); 
 $request->setMethod("GET");  
-$request->setInstanceId($instanceId);
-$response = $client->getAcsResponse($request);                                             */
+$request->setInstanceId($getInstanceId);
+$response = $client->getAcsResponse($request);  
 
-/*waitng changing the status
+$start = microtime(true);
 
-*/
+//waitng changing the status
+while(true){
+        $request = new Ecs\DescribeInstancesRequest();
+        $request->setMethod("GET");
+        $response = $client->getAcsResponse($request);
+                                                                                                                 
+        $level_1 = $response->Instances;
+        $level_2 = $level_1->Instance;
+        $level_3 = $level_2[$count];
+                                                                                                                 
+        if($level_3->Status == "Stopped"){
+                break;
+        }
+}
 
-/*
+$end = microtime(true);
+                                                                                                                 
+//Showing the time of stopping
+echo "\nstopping time: ".($end - $start)."sec\n";
+
+
 //Showing the status of the instance
-$request = new Ecs\DescribeInstanceStatusRequest();
-$request->setMethod("GET"); 
-$zoneId = "cn-hongkong-b"; 
-$request->setZoneId($zoneId);
-$response = $client->getAcsResponse($request);
-print_r($response);
-*/
+echo "\nInstace status: ";
+print_r($level_3->Status);
+echo "\n";
 
-/*
+
 // removing the instance
 $request = new Ecs\DeleteInstanceRequest(); 
 $request->setMethod("GET");  
-$request->setInstanceId($instanceId);  
+$request->setInstanceId($getInstanceId);  
 $response = $client->getAcsResponse($request);
-*/
+
 
 /*waitng changing the status*/
                                                                                                               
-/*
+
+
 //Showing the status of the instance
 $request = new Ecs\DescribeInstanceStatusRequest();
 $request->setMethod("GET"); 
 $zoneId = "cn-hongkong-b"; 
 $request->setZoneId($zoneId);
 $response = $client->getAcsResponse($request);
+echo "\n";
 print_r($response);
-*/
+
+
+echo "\nfinished removing the instance(instanceID: " . $getInstanceId . ")\n";
