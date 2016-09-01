@@ -17,12 +17,16 @@ $request->setSecurityGroupId($securityId);
 $diskCategory = "cloud_efficiency";
 //var_dump($diskCategory);
 $request->setSystemDiskCategory($diskCategory);
-var_dump($request->getSystemDiskCategory());
-exit();
+//$request->setDataDisk1Category($diskCategory);
+//$request->setDataDisk2Category($diskCategory);
+//$request->setDataDisk3Category($diskCategory);
+//$request->setDataDisk4Category($diskCategory);
+//var_dump($request->getSystemDiskCategory());
+//exit();
 $opt = "optimized";
 $request->setIoOptimized($opt);
 
 $request->setMethod("GET");
-
-$response = $client->getAcsResponse($request); 
+$response = $client->getAcsResponse($request);
+//$response = $client->doAction($request); 
 print_r($response);
