@@ -9,20 +9,27 @@ $client = new DefaultAcsClient($iClientProfile);
 $request = new Ecs\DescribeInstancesRequest();
 $request->setMethod("GET");
 $response = $client->getAcsResponse($request);
-$total = $response->TotalCount;
-
-/* Creating the instance
 
 
+$initialTotal = $response->TotalCount;
 
-$start = microtime(true);
+/*-------------------(about creating instance)
+// Creating the instance
+try{
+
+}catch(Exception $e){
 
 // When cannot create the instance
 $csv = ",NG,,NG,,NG,,NG,\n";
 echo "error: cannot create the instance\n";                                                        
 file_put_contents("task.csv",$csv,FILE_APPEND);
 exit();
-*/
+
+}
+-------------------(about creating instance)*/
+$start = microtime(true);
+
+/*-------------------(about creating instance)
 
 // monitoring the state
 while(true){
@@ -32,16 +39,12 @@ while(true){
 	if($response->TotalCount == $total + 1){
 		break;
 	}
-	/* When cannot create the instance
-	if(){
-		$csv = ",NG,,NG,,NG,,NG,\n";
-		echo "error: cannot create the instance\n";                                                        		 file_put_contents("task.csv",$csv,FILE_APPEND);
-		exit();
-	}
-	*/
 }
+----------------------------(about creating instance)*/
+
 
 $end = microtime(true);
+
 
 //getting an instanceID
 $getInstanceId = "i-62gx8dwm0";
@@ -75,11 +78,11 @@ echo "\nInstance Information\n" . "InstanceID: ". $instanceId . "\n" .
 "Memory: " . $level_3->Memory . "\n" . "Status: " . $level_3->Status . "\n";
 
 
-/* Showing the time of creating the instance
+// Showing the time of creating the instance
 $calculatedTime = $end - $start;
 echo "\ncreating time: ".$calculatedTime."sec\n";
 $csv = $csv . "," . $calculatedTime;
-*/
+
 
 // Starting the instance
 $request = new Ecs\StartInstanceRequest(); 
@@ -106,14 +109,14 @@ while(true){
 		break;
 	}
 
-	/*when cannot start the instance
-	if(){
+	//when cannot start the instance
+	if($level_3->Status == "Stopped"){
 		$csv = $csv . ",NG,,NG,,NG,\n";
 		file_put_contents("task.csv",$csv,FILE_APPEND);
 		echo "error: cannot start the instance\n";
 		exit();
 	}
-	*/
+	
 }
 
 $end = microtime(true);
@@ -138,7 +141,7 @@ $response = $client->getAcsResponse($request);
 
 $start = microtime(true);
 
-//waitng changing the status
+//monitoring the status
 while(true){
         $request = new Ecs\DescribeInstancesRequest();
         $request->setMethod("GET");
@@ -152,11 +155,12 @@ while(true){
                 break;
         }
 
-	/*when cannot stop the instance
-        $csv = $csv . ",NG,,NG,\n";
-        file_put_contents("task.csv",$csv,FILE_APPEND);
-        exit();
-        */
+	//when cannot stop the instance
+	if($level_3->Status == "Running"){
+        	$csv = $csv . ",NG,,NG,\n";
+        	file_put_contents("task.csv",$csv,FILE_APPEND);
+        	exit();
+	}
 }
 
 $end = microtime(true);
@@ -173,28 +177,39 @@ echo "\n";
 
 $csv = $csv . ",OK,". $calculatedTime;
 
-/*------------------------
+/*-------------------------------------------------(about creating instance)
 // removing the instance
 $request = new Ecs\DeleteInstanceRequest(); 
 $request->setMethod("GET");  
 $request->setInstanceId($getInstanceId);  
 $response = $client->getAcsResponse($request);
+-------------------------------------------------(about creating instance)*/
 
 $start = microtime(true);
 
-/*waitng changing the status
+/*-------------------------------------------(about creating instance)
+// monitoring the status
+while(true){
+        $request = new Ecs\DescribeInstancesRequest();
+        $request->setMethod("GET");
+        $response = $client->getAcsResponse($request);
+        if($response->TotalCount == $initialTotal){
+                break;
+        }
 
-//when cannot remove the instance
-$csv = $csv . ",NG,\n";
-file_put_contents("task.csv",$csv,FILE_APPEND);
-exit();
+	//when cannot remove the instance  -> using try and catch or a status
+	if(){
+		$csv = $csv . ",NG,\n";
+		file_put_contents("task.csv",$csv,FILE_APPEND);
+		exit();
+	}
+}
 
+-------------------------------------------(about creating instance)*/
 
-*/
+$end = microtime(true);                                                                                                        
 
-//$end = microtime(true);                                                                                                        
-
-/*------------------------
+/*-------------------------------------------(about creating instance)
 //Showing the status of the instance
 $request = new Ecs\DescribeInstanceStatusRequest();
 $request->setMethod("GET"); 
@@ -203,10 +218,10 @@ $request->setZoneId($zoneId);
 $response = $client->getAcsResponse($request);
 echo "\n";
 print_r($response);
+-------------------------------------------(about creating instance)*/
 
 $calculatedTime = $end - $start;
 echo "\nfinished removing the instance(instanceID: " . $getInstanceId . ")\n";
-$csv = $csv . ",OK," . $calculatedTime;
----------------------------*/
-$csv = $csv . "\n";
+$csv = $csv . ",OK," . $calculatedTime . "\n";
+
 file_put_contents("task.csv",$csv,FILE_APPEND);

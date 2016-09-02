@@ -27,6 +27,8 @@ $opt = "optimized";
 $request->setIoOptimized($opt);
 
 $request->setMethod("GET");
+
+
 $response = $client->getAcsResponse($request);
 //$response = $client->doAction($request); 
 print_r($response);
