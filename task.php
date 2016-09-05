@@ -13,10 +13,30 @@ $response = $client->getAcsResponse($request);
 
 $initialTotal = $response->TotalCount;
 
-/*-------------------(about creating instance)
+
 // Creating the instance
 try{
 
+$request = new Ecs\CreateInstanceRequest();
+                                                                                                                       
+$imageId = "ubuntu1204_32_40G_cloudinit_20160427.raw";
+$request->setImageId($imageId);
+$instanceType = "ecs.n1.tiny";
+$request->setInstanceType($instanceType);
+$name = "created-by-php";
+$request->setInstanceName($name);
+$securityId = "sg-62txsl3lo";
+$request->setSecurityGroupId($securityId);
+$diskCategory = "cloud_efficiency";
+$request->setSystemDiskCategory($diskCategory);
+$opt = "optimized";
+$request->setIoOptimized($opt);
+                                                                                                                       
+$request->setMethod("GET");
+                                                                                                                       
+                                                                                                                       
+$response = $client->getAcsResponse($request);
+//$response = $client->doAction($request); 
 }catch(Exception $e){
 
 // When cannot create the instance
@@ -24,31 +44,29 @@ $csv = ",NG,,NG,,NG,,NG,\n";
 echo "error: cannot create the instance\n";                                                        
 file_put_contents("task.csv",$csv,FILE_APPEND);
 exit();
-
 }
--------------------(about creating instance)*/
+
+//getting an instanceID
+$getInstanceId = $response->InstanceId;
+$csv = $getInstanceId . "," . "OK";
+
+
 $start = microtime(true);
 
-/*-------------------(about creating instance)
 
 // monitoring the state
 while(true){
         $request = new Ecs\DescribeInstancesRequest();
         $request->setMethod("GET");
         $response = $client->getAcsResponse($request);
-	if($response->TotalCount == $total + 1){
+	if($response->TotalCount == $initialTotal + 1){
 		break;
 	}
 }
-----------------------------(about creating instance)*/
+
 
 
 $end = microtime(true);
-
-
-//getting an instanceID
-$getInstanceId = "i-62gx8dwm0";
-$csv = $getInstanceId . "," . "OK";
 
 // Showing the information of the instance
 
@@ -72,15 +90,16 @@ for($count = 0; $count < $total; $count++){
 	}
 }
 
-echo "\nInstance Information\n" . "InstanceID: ". $instanceId . "\n" .
+echo "\nInstance Information------------------------------\n" . "InstanceID: ". $instanceId . "\n" .
 "RegionID: " . $level_3->RegionId . "\n" . "ZoneID: " . $level_3->ZoneId . "\n" .
 "ImageID: " . $level_3->ImageId . "\n" . "CPU: " . $level_3->Cpu . "\n" .
-"Memory: " . $level_3->Memory . "\n" . "Status: " . $level_3->Status . "\n";
+"Memory: " . $level_3->Memory . "\n" . 
+"--------------------------------------------------";
 
 
 // Showing the time of creating the instance
 $calculatedTime = $end - $start;
-echo "\ncreating time: ".$calculatedTime."sec\n";
+echo "\nCreating time: ".$calculatedTime."sec\n";
 $csv = $csv . "," . $calculatedTime;
 
 
@@ -121,15 +140,14 @@ while(true){
 
 $end = microtime(true);
 
-//Showing the time of starting
-$calculatedTime = $end - $start;
-echo "\nstarting time: ".$calculatedTime."sec\n"; 
-
-
 //Showing the status of the instance (wanna show only one instance)
 echo "\nInstace status: ";
 print_r($level_3->Status);
 echo "\n";
+
+//Showing the time of starting
+$calculatedTime = $end - $start;
+echo "Starting time: ".$calculatedTime."sec\n";
 
 $csv = $csv . ",OK,". $calculatedTime;
 
@@ -165,29 +183,36 @@ while(true){
 
 $end = microtime(true);
                                                                                                                  
-//Showing the time of stopping
-$calculatedTime = $end - $start;
-echo "\nstopping time: ".$calculatedTime."sec\n";
-
-
 //Showing the status of the instance
 echo "\nInstace status: ";
 print_r($level_3->Status);
 echo "\n";
 
+//Showing the time of stopping
+$calculatedTime = $end - $start;
+echo "Stopping time: ".$calculatedTime."sec\n";
+
 $csv = $csv . ",OK,". $calculatedTime;
 
-/*-------------------------------------------------(about creating instance)
+
 // removing the instance
+try{
 $request = new Ecs\DeleteInstanceRequest(); 
 $request->setMethod("GET");  
 $request->setInstanceId($getInstanceId);  
 $response = $client->getAcsResponse($request);
--------------------------------------------------(about creating instance)*/
+}catch(Exception $e){
+                                                                                                                       
+// When cannot remove the instance
+$csv = ",NG,\n";
+echo "error: cannot remove the instance\n";
+file_put_contents("task.csv",$csv,FILE_APPEND);
+exit();
+}
 
 $start = microtime(true);
 
-/*-------------------------------------------(about creating instance)
+
 // monitoring the status
 while(true){
         $request = new Ecs\DescribeInstancesRequest();
@@ -196,20 +221,13 @@ while(true){
         if($response->TotalCount == $initialTotal){
                 break;
         }
-
-	//when cannot remove the instance  -> using try and catch or a status
-	if(){
-		$csv = $csv . ",NG,\n";
-		file_put_contents("task.csv",$csv,FILE_APPEND);
-		exit();
-	}
 }
 
--------------------------------------------(about creating instance)*/
+
 
 $end = microtime(true);                                                                                                        
 
-/*-------------------------------------------(about creating instance)
+/*
 //Showing the status of the instance
 $request = new Ecs\DescribeInstanceStatusRequest();
 $request->setMethod("GET"); 
@@ -218,10 +236,11 @@ $request->setZoneId($zoneId);
 $response = $client->getAcsResponse($request);
 echo "\n";
 print_r($response);
--------------------------------------------(about creating instance)*/
+*/
 
 $calculatedTime = $end - $start;
-echo "\nfinished removing the instance(instanceID: " . $getInstanceId . ")\n";
+echo "\nfinished removing the instance(instanceID: " . $getInstanceId . ")\n" . 
+     "Removeing time: " . $calculatedTime . "sec" . "\n\n";
 $csv = $csv . ",OK," . $calculatedTime . "\n";
 
 file_put_contents("task.csv",$csv,FILE_APPEND);

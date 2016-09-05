@@ -15,14 +15,7 @@ $request->setInstanceName($name);
 $securityId = "sg-62txsl3lo";
 $request->setSecurityGroupId($securityId);
 $diskCategory = "cloud_efficiency";
-//var_dump($diskCategory);
 $request->setSystemDiskCategory($diskCategory);
-//$request->setDataDisk1Category($diskCategory);
-//$request->setDataDisk2Category($diskCategory);
-//$request->setDataDisk3Category($diskCategory);
-//$request->setDataDisk4Category($diskCategory);
-//var_dump($request->getSystemDiskCategory());
-//exit();
 $opt = "optimized";
 $request->setIoOptimized($opt);
 
